@@ -2,10 +2,8 @@
 #nullable enable
 public partial class Mapper
 {
-    private partial void Map(System.Collections.Generic.List<A>? source, System.Collections.Generic.Queue<B> target)
+    private partial void Map(System.Collections.Generic.Stack<A> source, System.Collections.Generic.Queue<B> target)
     {
-        if (source == null)
-            return;
         target.EnsureCapacity(((System.Collections.ICollection)source).Count + ((System.Collections.ICollection)target).Count);
         foreach (var item in source)
         {

@@ -78,6 +78,46 @@ internal static class SymbolExtensions
         return genericIntf != null;
     }
 
+    internal static bool ImplementsInterface(
+       this ITypeSymbol t,
+       INamedTypeSymbol interfaceSymbol,
+       [NotNullWhen(true)] out INamedTypeSymbol? matchingIntf)
+    {
+        if (SymbolEqualityComparer.Default.Equals(t.OriginalDefinition, interfaceSymbol))
+        {
+            matchingIntf = (INamedTypeSymbol)t;
+            return true;
+        }
+
+        matchingIntf = t.AllInterfaces.FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.OriginalDefinition, interfaceSymbol));
+        return matchingIntf != null;
+    }
+
+    // TODO: move and refactor
+    internal static bool HasImplicitInterfaceMethod(this ITypeSymbol symbol, INamedTypeSymbol inter, string methodName)
+    {
+        // return true if symbol is the same interface
+        if(SymbolEqualityComparer.Default.Equals(symbol, inter))
+        {
+            return true;
+        }
+
+        // return false if it does not implement the interface
+        if (!symbol.ImplementsGeneric(inter, out var typedInter))
+            return false;
+
+        var interfaceMethodSymbol = typedInter.GetMembers(methodName).OfType<IMethodSymbol>().Single();
+
+        var methodInterImplementaton = symbol.FindImplementationForInterfaceMember(interfaceMethodSymbol) as IMethodSymbol;
+
+        // if null then the symbol must be ICollection<T> or unimplemented
+        if (methodInterImplementaton is null)
+            return true;
+
+        // check if methodImplementation is explicit
+        return !methodInterImplementaton.ExplicitInterfaceImplementations.Any();
+    }
+
     internal static bool CanConsumeType(this ITypeParameterSymbol typeParameter, Compilation compilation, ITypeSymbol type)
     {
         if (typeParameter.HasConstructorConstraint && !type.HasAccessibleParameterlessConstructor())

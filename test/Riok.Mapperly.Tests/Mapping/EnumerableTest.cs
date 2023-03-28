@@ -456,6 +456,132 @@ public class EnumerableTest
     }
 
     [Fact]
+    public void EnumerableToImmutableListOfCastedTypes()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableList<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableList.ToImmutableList(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableList()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableList<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableList.ToImmutableList(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableHashSet()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableHashSet<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableHashSet.ToImmutableHashSet(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableQueue()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableQueue<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableQueue.CreateRange(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableStack()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableStack<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableStack.CreateRange(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableSortedSet()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableSortedSet<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableSortedSet.ToImmutableSortedSet(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void EnumerableToImmutableArrayOfCastedTypes()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public IEnumerable<int> Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableArray<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value = System.Collections.Immutable.ImmutableArray.ToImmutableArray(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
     public void EnumerableToCustomCollection()
     {
         var source = TestSourceBuilder.Mapping(
@@ -521,6 +647,24 @@ public class EnumerableTest
     }
 
     [Fact]
+    public void EnumerableToAddRangeList()
+    {
+        var source = TestSourceBuilder.Mapping(
+            "A",
+            "B",
+            "class A { public IEnumerable<int> Value { get; } }",
+            "class B { public List<long> Value { get; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMapMethodBody(
+                """
+                var target = new B();
+                target.Value.AddRange(System.Linq.Enumerable.Select(source.Value, x => (long)x));
+                return target;
+                """);
+    }
+
+    [Fact]
     public void EnumerableToCreatedStack()
     {
         var source = TestSourceBuilder.Mapping(
@@ -555,6 +699,52 @@ public class EnumerableTest
             .HaveMethodBody("MapToQueue",
                 """
                 var target = new System.Collections.Generic.Queue<long>();
+                foreach (var item in source)
+                {
+                    target.Enqueue((long)item);
+                }
+
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void CollectionToCreatedCollectionEnsureCapacity()
+    {
+        var source = TestSourceBuilder.Mapping(
+            "A",
+            "B",
+            "class A { public Stack<int> Value { get; } }",
+            "class B { public Queue<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMethodBody("MapToQueue",
+                """
+                var target = new System.Collections.Generic.Queue<long>();
+                target.EnsureCapacity(((System.Collections.ICollection)source).Count + ((System.Collections.ICollection)target).Count);
+                foreach (var item in source)
+                {
+                    target.Enqueue((long)item);
+                }
+
+                return target;
+                """);
+    }
+
+    [Fact]
+    public void ArrayToCreatedCollectionEnsureCapacity()
+    {
+        var source = TestSourceBuilder.Mapping(
+            "A",
+            "B",
+            "class A { public int[] Value { get; } }",
+            "class B { public Queue<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMethodBody("MapToQueue",
+                """
+                var target = new System.Collections.Generic.Queue<long>();
+                target.EnsureCapacity(((System.Collections.ICollection)source).Count + ((System.Collections.ICollection)target).Count);
                 foreach (var item in source)
                 {
                     target.Enqueue((long)item);
@@ -600,6 +790,28 @@ public class EnumerableTest
     }
 
     [Fact]
+    public Task MapCollectionToCollectionShouldWork()
+    {
+        var source = TestSourceBuilder.MapperWithBodyAndTypes(
+            "partial void Map(Stack<A> source, Queue<B> target);",
+            "class A { public string Value { get; set; } }",
+            "class B { public string Value { get; set; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task MapArrayToCollectionShouldWork()
+    {
+        var source = TestSourceBuilder.MapperWithBodyAndTypes(
+            "partial void Map(A[] source, Queue<B> target);",
+            "class A { public string Value { get; set; } }",
+            "class B { public string Value { get; set; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
     public Task MapToExistingCollectionShouldWork()
     {
         var source = TestSourceBuilder.MapperWithBodyAndTypes(
@@ -629,6 +841,78 @@ public class EnumerableTest
             "partial void Map(List<A>? source, Queue<B> target);",
             "class A { public string Value { get; set; } }",
             "class B { public string Value { get; set; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableList()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableList<int> Value { get; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableArray()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableArray<int> Value { get; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableHashSet()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableHashSet<int> Value { get; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableQueue()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableQueue<int> Value { get; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableStack()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableStack<int> Value { get; } }");
+
+        return TestHelper.VerifyGenerator(source);
+    }
+
+    [Fact]
+    public Task EnumerableToReadonlyImmutableSortedSet()
+    {
+        var source = TestSourceBuilder.Mapping(
+           "A",
+           "B",
+           "class A { public int Value { get; } }",
+           "class B { public System.Collections.Immutable.ImmutableSortedSet<int> Value { get; } }");
 
         return TestHelper.VerifyGenerator(source);
     }

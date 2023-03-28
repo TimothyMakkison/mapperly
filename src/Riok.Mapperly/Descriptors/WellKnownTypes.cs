@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Riok.Mapperly.Abstractions;
 using Riok.Mapperly.Abstractions.ReferenceHandling;
@@ -23,6 +24,7 @@ public class WellKnownTypes
     private INamedTypeSymbol? _iEnumerable;
     private INamedTypeSymbol? _enumerable;
     private INamedTypeSymbol? _iCollection;
+    private INamedTypeSymbol? _iCollectionT;
     private INamedTypeSymbol? _iReadOnlyCollection;
     private INamedTypeSymbol? _iList;
     private INamedTypeSymbol? _list;
@@ -32,6 +34,23 @@ public class WellKnownTypes
     private INamedTypeSymbol? _keyValuePair;
     private INamedTypeSymbol? _dictionary;
     private INamedTypeSymbol? _enum;
+
+    private INamedTypeSymbol? _immutableArray;
+    private INamedTypeSymbol? _immutableArrayT;
+    private INamedTypeSymbol? _immutableList;
+    private INamedTypeSymbol? _immutableListT;
+    private INamedTypeSymbol? _immutableHashSet;
+    private INamedTypeSymbol? _immutableHashSetT;
+    private INamedTypeSymbol? _immutableQueue;
+    private INamedTypeSymbol? _immutableQueueT;
+    private INamedTypeSymbol? _immutableStack;
+    private INamedTypeSymbol? _immutableStackT;
+    private INamedTypeSymbol? _immutableSortedSet;
+    private INamedTypeSymbol? _immutableSortedSetT;
+    private INamedTypeSymbol? _immutableDictionary;
+    private INamedTypeSymbol? _immutableDictionaryT;
+    private INamedTypeSymbol? _immutableSortedDictionary;
+    private INamedTypeSymbol? _immutableSortedDictionaryT;
 
     private INamedTypeSymbol? _iQueryable;
 
@@ -53,7 +72,8 @@ public class WellKnownTypes
     public INamedTypeSymbol IReadOnlyDictionary => _iReadOnlyDictionary ??= GetTypeSymbol(typeof(IReadOnlyDictionary<,>));
     public INamedTypeSymbol IEnumerable => _iEnumerable ??= GetTypeSymbol(typeof(IEnumerable<>));
     public INamedTypeSymbol Enumerable => _enumerable ??= GetTypeSymbol(typeof(Enumerable));
-    public INamedTypeSymbol ICollection => _iCollection ??= GetTypeSymbol(typeof(ICollection<>));
+    public INamedTypeSymbol ICollection => _iCollection ??= GetTypeSymbol(typeof(System.Collections.ICollection));
+    public INamedTypeSymbol ICollectionT => _iCollectionT ??= GetTypeSymbol(typeof(ICollection<>));
     public INamedTypeSymbol IReadOnlyCollection => _iReadOnlyCollection ??= GetTypeSymbol(typeof(IReadOnlyCollection<>));
     public INamedTypeSymbol IList => _iList ??= GetTypeSymbol(typeof(IList<>));
     public INamedTypeSymbol List => _list ??= GetTypeSymbol(typeof(List<>));
@@ -65,8 +85,26 @@ public class WellKnownTypes
     public INamedTypeSymbol Enum => _enum ??= GetTypeSymbol(typeof(Enum));
     public INamedTypeSymbol IQueryable => _iQueryable ??= GetTypeSymbol(typeof(IQueryable<>));
 
+    public INamedTypeSymbol ImmutableArray => _immutableArray ??= GetTypeSymbol(typeof(ImmutableArray));
+    public INamedTypeSymbol ImmutableArrayT => _immutableArrayT ??= GetTypeSymbol(typeof(ImmutableArray<>));
+    public INamedTypeSymbol ImmutableList => _immutableList ??= GetTypeSymbol(typeof(ImmutableList));
+    public INamedTypeSymbol ImmutableListT => _immutableListT ??= GetTypeSymbol(typeof(ImmutableList<>));
+    public INamedTypeSymbol ImmutableHashSet => _immutableHashSet ??= GetTypeSymbol(typeof(ImmutableHashSet));
+    public INamedTypeSymbol ImmutableHashSetT => _immutableHashSetT ??= GetTypeSymbol(typeof(ImmutableHashSet<>));
+    public INamedTypeSymbol ImmutableQueue => _immutableQueue ??= GetTypeSymbol(typeof(ImmutableQueue));
+    public INamedTypeSymbol ImmutableQueueT => _immutableQueueT ??= GetTypeSymbol(typeof(ImmutableQueue<>));
+    public INamedTypeSymbol ImmutableStack => _immutableStack ??= GetTypeSymbol(typeof(ImmutableStack));
+    public INamedTypeSymbol ImmutableStackT => _immutableStackT ??= GetTypeSymbol(typeof(ImmutableStack<>));
+    public INamedTypeSymbol ImmutableSortedSet => _immutableSortedSet ??= GetTypeSymbol(typeof(ImmutableSortedSet));
+    public INamedTypeSymbol ImmutableSortedSetT => _immutableSortedSetT ??= GetTypeSymbol(typeof(ImmutableSortedSet<>));
+    public INamedTypeSymbol ImmutableDictionary => _immutableDictionary ??= GetTypeSymbol(typeof(ImmutableDictionary));
+    public INamedTypeSymbol ImmutableDictionaryT => _immutableDictionaryT ??= GetTypeSymbol(typeof(ImmutableDictionary<,>));
+    public INamedTypeSymbol ImmutableSortedDictionary => _immutableSortedDictionary ??= GetTypeSymbol(typeof(ImmutableSortedDictionary));
+    public INamedTypeSymbol ImmutableSortedDictionaryT => _immutableSortedDictionaryT ??= GetTypeSymbol(typeof(ImmutableSortedDictionary<,>));
+
     // use string type name as they are not available in netstandard2.0
     public INamedTypeSymbol? DateOnly => _dateOnly ??= GetTypeSymbol("System.DateOnly");
+
     public INamedTypeSymbol? TimeOnly => _timeOnly ??= GetTypeSymbol("System.TimeOnly");
 
     private INamedTypeSymbol GetTypeSymbol(Type type)

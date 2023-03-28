@@ -6,6 +6,7 @@ public partial class Mapper
     {
         if (source == null)
             return;
+        target.EnsureCapacity(((System.Collections.ICollection)source).Count + ((System.Collections.ICollection)target).Count);
         foreach (var item in source)
         {
             target.Push(MapToB(item));

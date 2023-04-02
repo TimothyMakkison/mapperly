@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Riok.Mapperly.Emit.SyntaxFactoryHelper;
@@ -41,5 +43,51 @@ public class ForEachAddEnumerableExistingTargetMapping : ExistingTargetMapping
                 ctx.Source,
                 Block(ExpressionStatement(Invocation(addMethod, convertedSourceItemExpression))))
         };
+    }
+
+
+    private static ExpressionStatementSyntax? EnsureCapacityStatement(ITypeSymbol sourceType, ITypeSymbol targetType, ExpressionSyntax source, ExpressionSyntax target, WellKnownTypes types)
+    {
+        var capacityMethod = targetType.GetMembers(EnsureCapacityName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault();
+
+        if (capacityMethod == null)
+        {
+            return null;
+        }
+
+        if (!TryCreateCollectionCount(sourceType, source, types, out var sourceCount))
+        {
+            return null;
+        }
+        if (!TryCreateCollectionCount(targetType, target, types, out var targetCount))
+        {
+            return null;
+        }
+
+        var sumMethod = BinaryExpression(SyntaxKind.AddExpression, sourceCount, targetCount);
+        return ExpressionStatement(Invocation(MemberAccess(target, EnsureCapacityName), sumMethod));
+    }
+
+    private static bool TryCreateCollectionCount(ITypeSymbol value, ExpressionSyntax valuesSyntax, WellKnownTypes types, [NotNullWhen(true)] out ExpressionSyntax? expression)
+    {
+        if (value.ImplementsInterface(types.ICollection, out var inter))
+        {
+            var identifier = IdentifierName(inter.ToDisplayString());
+            var cast = ParenthesizedExpression(CastExpression(identifier, valuesSyntax));
+            expression = MemberAccess(cast, CollectionCountName);
+            return true;
+        }
+        if (value.ImplementsInterface(types.ICollectionT, out var genInter))
+        {
+            var identifier = IdentifierName(genInter.ToDisplayString());
+            var cast = ParenthesizedExpression(CastExpression(identifier, valuesSyntax));
+            expression = MemberAccess(cast, CollectionCountName);
+            return true;
+        }
+
+        expression = null;
+        return false;
     }
 }

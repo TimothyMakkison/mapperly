@@ -20,3 +20,7 @@ var carDto = CarMapper.MapCarToDto(car);
 
 Console.WriteLine("Mapped car to car DTO:");
 Console.WriteLine(JsonSerializer.Serialize(carDto, new JsonSerializerOptions { WriteIndented = true }));
+
+var l = Enumerable.Range(0, 10);
+Enumerable.TryGetNonEnumeratedCount(l, out var count);
+

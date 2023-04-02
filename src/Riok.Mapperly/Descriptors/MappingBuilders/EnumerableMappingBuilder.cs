@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Riok.Mapperly.Abstractions;
+using Riok.Mapperly.Descriptors.Enumerables.EnsureCapacity;
 using Riok.Mapperly.Descriptors.Mappings;
 using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Diagnostics;
@@ -74,18 +75,24 @@ public static class EnumerableMappingBuilder
             return null;
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Stack<object>.Push));
+            return CreateForEach(nameof(Stack<object>.Push));
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Queue<object>.Enqueue));
+            return CreateForEach(nameof(Queue<object>.Enqueue));
 
         // create a foreach loop with add calls if source is not an array
         // and  ICollection.Add(T): void is implemented and not explicit
         // ensures add is not called and immutable types
         if (!ctx.Target.IsArrayType() && ctx.Target.HasImplicitInterfaceMethod(ctx.Types.ICollectionT, AddValueMethodName))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, AddValueMethodName);
+            return CreateForEach(AddValueMethodName);
 
         return null;
+
+        ForEachAddEnumerableExistingTargetMapping CreateForEach(string propertyName)
+        {
+            var ensureCapInfo = EnsureCapacityHelper.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
+            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, propertyName, ensureCapInfo);
+        }
     }
 
     private static ITypeMapping? BuildElementMapping(MappingBuilderContext ctx)
@@ -128,18 +135,24 @@ public static class EnumerableMappingBuilder
         }
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Stack<object>.Push));
+            return CreateForEach(nameof(Stack<object>.Push));
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Queue<object>.Enqueue));
+            return CreateForEach(nameof(Queue<object>.Enqueue));
 
         // create a foreach loop with add calls if source is not an array
         // and  ICollection.Add(T): void is implemented and not explicit
         // ensures add is not called and immutable types
         if (!ctx.Target.IsArrayType() && ctx.Target.HasImplicitInterfaceMethod(ctx.Types.ICollectionT, AddValueMethodName))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, AddValueMethodName);
+            return CreateForEach(AddValueMethodName);
 
         return null;
+
+        ForEachAddEnumerableMapping CreateForEach(string propertyName)
+        {
+            var ensureCapacityBuilder = EnsureCapacityHelper.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
+            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapacityBuilder);
+        }
     }
 
     private static (bool CanMapWithLinq, string? CollectMethod) ResolveCollectMethodName(MappingBuilderContext ctx)

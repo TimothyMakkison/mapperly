@@ -644,6 +644,11 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new global::B();
+                if (global::System.Linq.Enumerable.TryGetNonEnumeratedCount(source.Value, out var sourceCount))
+                {
+                    target.Value.EnsureCapacity(sourceCount + target.Value.Count);
+                }
+
                 foreach (var item in source.Value)
                 {
                     target.Value.Push((long)item);
@@ -666,6 +671,11 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new global::B();
+                if (global::System.Linq.Enumerable.TryGetNonEnumeratedCount(source.Value, out var sourceCount))
+                {
+                    target.Value.EnsureCapacity(sourceCount + target.Value.Count);
+                }
+
                 foreach (var item in source.Value)
                 {
                     target.Value.Enqueue((long)item);
@@ -688,6 +698,11 @@ public class EnumerableTest
             .HaveMethodBody("MapToStack",
                 """
                 var target = new global::System.Collections.Generic.Stack<long>();
+                if (global::System.Linq.Enumerable.TryGetNonEnumeratedCount(source, out var sourceCount))
+                {
+                    target.EnsureCapacity(sourceCount + target.Count);
+                }
+
                 foreach (var item in source)
                 {
                     target.Push((long)item);
@@ -710,6 +725,11 @@ public class EnumerableTest
             .HaveMethodBody("MapToQueue",
                 """
                 var target = new global::System.Collections.Generic.Queue<long>();
+                if (global::System.Linq.Enumerable.TryGetNonEnumeratedCount(source, out var sourceCount))
+                {
+                    target.EnsureCapacity(sourceCount + target.Count);
+                }
+
                 foreach (var item in source)
                 {
                     target.Enqueue((long)item);

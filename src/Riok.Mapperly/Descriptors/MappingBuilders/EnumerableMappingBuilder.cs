@@ -23,13 +23,13 @@ public static class EnumerableMappingBuilder
 
         // if element mapping is synthetic
         // and target is an IEnumerable, there is no mapping needed at all.
-        if (elementMapping.IsSynthetic && SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IEnumerable))
+        if (elementMapping.IsSynthetic && SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IEnumerableT))
             return new CastMapping(ctx.Source, ctx.Target);
 
         // if source is an array and target is an array or IReadOnlyCollection faster mappings can be applied
         if (!ctx.IsExpression
             && ctx.Source.IsArrayType()
-            && (ctx.Target.IsArrayType() || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyCollection)))
+            && (ctx.Target.IsArrayType() || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyCollectionT)))
         {
             // if element mapping is synthetic
             // a single Array.Clone / cast mapping call should be sufficient and fast,
@@ -58,13 +58,13 @@ public static class EnumerableMappingBuilder
         if (BuildElementMapping(ctx) is not { } elementMapping)
             return null;
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.Stack, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Stack<object>.Push));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.Queue, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Queue<object>.Enqueue));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollection, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(ICollection<object>.Add));
 
         return null;
@@ -109,13 +109,13 @@ public static class EnumerableMappingBuilder
             return null;
         }
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.Stack, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
             return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Stack<object>.Push));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.Queue, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
             return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Queue<object>.Enqueue));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollection, out _))
+        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
             return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(ICollection<object>.Add));
 
         return null;
@@ -128,26 +128,26 @@ public static class EnumerableMappingBuilder
             return (true, ToArrayMethodName);
 
         // if the target is an IEnumerable<T> don't collect at all.
-        if (SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IEnumerable))
+        if (SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IEnumerableT))
             return (true, null);
 
         // if the target is IReadOnlyCollection<T>
         // and the count of the source is known (array, IReadOnlyCollection<T>, ICollection<T>) we collect to array
         // for performance/space reasons
-        var targetIsReadOnlyCollection = SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyCollection);
+        var targetIsReadOnlyCollection = SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyCollectionT);
         var sourceCountIsKnown =
             ctx.Source.IsArrayType()
-            || ctx.Source.ImplementsGeneric(ctx.Types.IReadOnlyCollection, out _)
-            || ctx.Source.ImplementsGeneric(ctx.Types.ICollection, out _);
+            || ctx.Source.ImplementsGeneric(ctx.Types.IReadOnlyCollectionT, out _)
+            || ctx.Source.ImplementsGeneric(ctx.Types.ICollectionT, out _);
         if (targetIsReadOnlyCollection && sourceCountIsKnown)
             return (true, ToArrayMethodName);
 
         // if target is a IReadOnlyCollection<T>, IList<T>, List<T> or ICollection<T> with ToList()
         return targetIsReadOnlyCollection
-            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyList)
-            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IList)
-            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.List)
-            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.ICollection)
+            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IReadOnlyListT)
+            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.IListT)
+            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.ListT)
+            || SymbolEqualityComparer.Default.Equals(ctx.Target.OriginalDefinition, ctx.Types.ICollectionT)
             ? (true, ToListMethodName)
             : (false, null);
     }
@@ -166,7 +166,7 @@ public static class EnumerableMappingBuilder
 
     private static ITypeSymbol? GetEnumeratedType(MappingBuilderContext ctx, ITypeSymbol type)
     {
-        return type.ImplementsGeneric(ctx.Types.IEnumerable, out var enumerableIntf)
+        return type.ImplementsGeneric(ctx.Types.IEnumerableT, out var enumerableIntf)
             ? enumerableIntf.TypeArguments[0]
             : null;
     }

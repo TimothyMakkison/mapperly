@@ -601,6 +601,29 @@ public class EnumerableTest
     }
 
     [Fact]
+    public void ArrayToCreatedStack()
+    {
+        var source = TestSourceBuilder.Mapping(
+            "A",
+            "B",
+            "class A { public int[] Value { get; } }",
+            "class B { public Stack<long> Value { get; set; } }");
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveMethodBody("MapToStack",
+                """
+                var target = new System.Collections.Generic.Stack<long>();
+                target.EnsureCapacity(source.Length + target.Count);
+                foreach (var item in source)
+                {
+                    target.Push((long)item);
+                }
+
+                return target;
+                """);
+    }
+
+    [Fact]
     public void EnumerableToCustomCollectionWithObjectFactory()
     {
         var source = TestSourceBuilder.MapperWithBodyAndTypes(

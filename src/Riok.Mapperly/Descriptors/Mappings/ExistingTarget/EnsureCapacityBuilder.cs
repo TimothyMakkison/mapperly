@@ -76,7 +76,7 @@ public static class EnsureCapacityBuilder
         // if source accessor is avaailable then create simple EnsureCapacity call
         if (state.SourceAccessor is not null)
         {
-            expression = EnsureCapacityStatement(target, MemberAccess(target, state.TargetAccessor), MemberAccess(ctx.Source, state.SourceAccessor));
+            expression = EnsureCapacityStatement(target, MemberAccess(ctx.Source, state.SourceAccessor), MemberAccess(target, state.TargetAccessor));
             return true;
         }
 
@@ -92,21 +92,21 @@ public static class EnsureCapacityBuilder
         return true;
     }
 
-    private static ExpressionStatementSyntax EnsureCapacityStatement(ExpressionSyntax target, ExpressionSyntax targetCount, ExpressionSyntax sourceCount)
+    private static ExpressionStatementSyntax EnsureCapacityStatement(ExpressionSyntax target, ExpressionSyntax sourceCount, ExpressionSyntax targetCount)
     {
         var sumMethod = BinaryExpression(SyntaxKind.AddExpression, sourceCount, targetCount);
         return ExpressionStatement(Invocation(MemberAccess(target, EnsureCapacityName), sumMethod));
     }
 
-    private static IfStatementSyntax IfIsTypeEnsureCapacityStatement(string identifier, TypeSyntax type, TypeMappingBuildContext ctx, ExpressionSyntax source, MemberAccessExpressionSyntax sourceCount)
+    private static IfStatementSyntax IfIsTypeEnsureCapacityStatement(string identifier, TypeSyntax type, TypeMappingBuildContext ctx, ExpressionSyntax target, MemberAccessExpressionSyntax targetCount)
     {
         var asCollection = Identifier(ctx.NameBuilder.New(identifier));
         var collectionCount = MemberAccess(IdentifierName(asCollection), "Count");
 
         var singleVariableDeclaration = DeclarationPattern(type, SingleVariableDesignation(asCollection));
-        var isExpression = IsPatternExpression(source, singleVariableDeclaration);
+        var isExpression = IsPatternExpression(ctx.Source,  singleVariableDeclaration);
 
-        var ifIsTypeStatement = IfStatement(isExpression, Block(EnsureCapacityStatement(source, sourceCount, collectionCount)));
+        var ifIsTypeStatement = IfStatement(isExpression, Block(EnsureCapacityStatement(target, collectionCount, targetCount)));
         return ifIsTypeStatement;
     }
 

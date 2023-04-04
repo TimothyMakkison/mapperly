@@ -489,11 +489,11 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new B();
-                if (target.Value is System.Collections.Generic.ICollection<int> collection)
+                if (source.Value is System.Collections.Generic.ICollection<int> collection)
                 {
                     target.Value.EnsureCapacity(collection.Count + target.Value.Count);
                 }
-                else if (target.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                else if (source.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
                 {
                     target.Value.EnsureCapacity(readonlyCollection.Count + target.Value.Count);
                 }
@@ -520,11 +520,11 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new B();
-                if (target.Value is System.Collections.Generic.ICollection<int> collection)
+                if (source.Value is System.Collections.Generic.ICollection<int> collection)
                 {
                     target.Value.EnsureCapacity(collection.Count + target.Value.Count);
                 }
-                else if (target.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                else if (source.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
                 {
                     target.Value.EnsureCapacity(readonlyCollection.Count + target.Value.Count);
                 }
@@ -551,11 +551,11 @@ public class EnumerableTest
             .HaveMethodBody("MapToStack",
                 """
                 var target = new System.Collections.Generic.Stack<long>();
-                if (target is System.Collections.Generic.ICollection<int> collection)
+                if (source is System.Collections.Generic.ICollection<int> collection)
                 {
                     target.EnsureCapacity(collection.Count + target.Count);
                 }
-                else if (target is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                else if (source is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
                 {
                     target.EnsureCapacity(readonlyCollection.Count + target.Count);
                 }
@@ -582,11 +582,11 @@ public class EnumerableTest
             .HaveMethodBody("MapToQueue",
                 """
                 var target = new System.Collections.Generic.Queue<long>();
-                if (target is System.Collections.Generic.ICollection<int> collection)
+                if (source is System.Collections.Generic.ICollection<int> collection)
                 {
                     target.EnsureCapacity(collection.Count + target.Count);
                 }
-                else if (target is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                else if (source is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
                 {
                     target.EnsureCapacity(readonlyCollection.Count + target.Count);
                 }

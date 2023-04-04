@@ -61,25 +61,21 @@ public static class EnumerableMappingBuilder
             return null;
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
-        {
             return CreateForEach(nameof(Stack<object>.Push));
-        }
+
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
-        {
             return CreateForEach(nameof(Queue<object>.Enqueue));
-        }
+
         if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
-        {
             return CreateForEach(nameof(ICollection<object>.Add));
-        }
+
+        return null;
 
         ForEachAddEnumerableExistingTargetMapping CreateForEach(string propertyName)
         {
             EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, propertyName, ensureCapInfo);
         }
-
-        return null;
     }
 
     private static ITypeMapping? BuildElementMapping(MappingBuilderContext ctx)
@@ -130,13 +126,13 @@ public static class EnumerableMappingBuilder
         if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
             return CreateForEach(nameof(ICollection<object>.Add));
 
+        return null;
+
         ForEachAddEnumerableMapping CreateForEach(string propertyName)
         {
             EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
             return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapInfo);
         }
-
-        return null;
     }
 
     private static (bool CanMapWithLinq, string? CollectMethod) ResolveCollectMethodName(MappingBuilderContext ctx)

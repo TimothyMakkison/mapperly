@@ -43,9 +43,11 @@ public static class EnsureCapacityBuilder
         // if source does not have a count/length then get information to get the non enumerated count at runtime.
         if (!TryGetNonEnumeratedCount(sourceType, types, out var sourceSizeProperty))
         {
-            var collectionType = ParseTypeName(types.ICollectionT.Construct((sourceType as INamedTypeSymbol)!.TypeArguments.ToArray()).ToDisplayString());
+            sourceType.ImplementsGeneric(types.IEnumerableT, out var iEnumerable);
 
-            var readonlyCollectionType = ParseTypeName(types.IReadOnlyCollectionT.Construct((sourceType as INamedTypeSymbol)!.TypeArguments.ToArray()).ToDisplayString());
+            var collectionType = ParseTypeName(types.ICollectionT.Construct(iEnumerable!.TypeArguments.ToArray()).ToDisplayString());
+
+            var readonlyCollectionType = ParseTypeName(types.IReadOnlyCollectionT.Construct(iEnumerable!.TypeArguments.ToArray()).ToDisplayString());
 
             state = new EnsureCapacityInfo()
             {

@@ -624,6 +624,29 @@ public class EnumerableTest
     }
 
     [Fact]
+    public void MapImplicitLengthShouldEnsureCapacity()
+    {
+        var source = TestSourceBuilder.Mapping(
+            "A",
+            "B",
+            "class A { public C Value { get; } }",
+            "class B { public Queue<int> Value { get; } }",
+            "class C : ICollection<int> { int Count => throw new NotImplementedException(); }");
+
+        TestHelper.GenerateMapper(source)
+            .Should()
+            .HaveSingleMethodBody(
+                """
+                var target = new B();
+                target.Value.EnsureCapacity(source.Value.Count + target.Value.Count);
+                foreach (var item in source.Value)
+                {
+                    target.Value.Enqueue(item);
+                }
+
+                return target;
+                """);
+    }
     public void EnumerableToCustomCollectionWithObjectFactory()
     {
         var source = TestSourceBuilder.MapperWithBodyAndTypes(

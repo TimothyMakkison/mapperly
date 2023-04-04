@@ -239,6 +239,7 @@ namespace Riok.Mapperly.IntegrationTests.Mapper
         private System.Collections.Generic.Stack<int> MapToStack(System.Collections.Generic.Stack<string> source)
         {
             var target = new System.Collections.Generic.Stack<int>();
+            target.EnsureCapacity(source.Count + target.Count);
             foreach (var item in source)
             {
                 target.Push(ParseableInt(item));
@@ -250,6 +251,7 @@ namespace Riok.Mapperly.IntegrationTests.Mapper
         private System.Collections.Generic.Queue<int> MapToQueue(System.Collections.Generic.Queue<string> source)
         {
             var target = new System.Collections.Generic.Queue<int>();
+            target.EnsureCapacity(source.Count + target.Count);
             foreach (var item in source)
             {
                 target.Enqueue(ParseableInt(item));
@@ -309,6 +311,7 @@ namespace Riok.Mapperly.IntegrationTests.Mapper
         private System.Collections.Generic.Stack<string> MapToStack1(System.Collections.Generic.Stack<int> source)
         {
             var target = new System.Collections.Generic.Stack<string>();
+            target.EnsureCapacity(source.Count + target.Count);
             foreach (var item in source)
             {
                 target.Push(item.ToString());
@@ -320,6 +323,7 @@ namespace Riok.Mapperly.IntegrationTests.Mapper
         private System.Collections.Generic.Queue<string> MapToQueue1(System.Collections.Generic.Queue<int> source)
         {
             var target = new System.Collections.Generic.Queue<string>();
+            target.EnsureCapacity(source.Count + target.Count);
             foreach (var item in source)
             {
                 target.Enqueue(item.ToString());

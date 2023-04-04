@@ -489,6 +489,15 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new B();
+                if (target.Value is System.Collections.Generic.ICollection<int> collection)
+                {
+                    target.Value.EnsureCapacity(collection.Count + target.Value.Count);
+                }
+                else if (target.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                {
+                    target.Value.EnsureCapacity(readonlyCollection.Count + target.Value.Count);
+                }
+
                 foreach (var item in source.Value)
                 {
                     target.Value.Push((long)item);
@@ -511,6 +520,15 @@ public class EnumerableTest
             .HaveMapMethodBody(
                 """
                 var target = new B();
+                if (target.Value is System.Collections.Generic.ICollection<int> collection)
+                {
+                    target.Value.EnsureCapacity(collection.Count + target.Value.Count);
+                }
+                else if (target.Value is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                {
+                    target.Value.EnsureCapacity(readonlyCollection.Count + target.Value.Count);
+                }
+
                 foreach (var item in source.Value)
                 {
                     target.Value.Enqueue((long)item);
@@ -533,6 +551,15 @@ public class EnumerableTest
             .HaveMethodBody("MapToStack",
                 """
                 var target = new System.Collections.Generic.Stack<long>();
+                if (target is System.Collections.Generic.ICollection<int> collection)
+                {
+                    target.EnsureCapacity(collection.Count + target.Count);
+                }
+                else if (target is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                {
+                    target.EnsureCapacity(readonlyCollection.Count + target.Count);
+                }
+
                 foreach (var item in source)
                 {
                     target.Push((long)item);
@@ -555,6 +582,15 @@ public class EnumerableTest
             .HaveMethodBody("MapToQueue",
                 """
                 var target = new System.Collections.Generic.Queue<long>();
+                if (target is System.Collections.Generic.ICollection<int> collection)
+                {
+                    target.EnsureCapacity(collection.Count + target.Count);
+                }
+                else if (target is System.Collections.Generic.IReadOnlyCollection<int> readonlyCollection)
+                {
+                    target.EnsureCapacity(readonlyCollection.Count + target.Count);
+                }
+
                 foreach (var item in source)
                 {
                     target.Enqueue((long)item);

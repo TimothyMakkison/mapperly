@@ -5,6 +5,8 @@ using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Diagnostics;
 using Riok.Mapperly.Helpers;
 
+//using static Riok.Mapperly.Descriptors.Mappings.ExistingTarget.ForEachAddEnumerableExistingTargetMapping;
+
 namespace Riok.Mapperly.Descriptors.MappingBuilders;
 
 public static class EnumerableMappingBuilder
@@ -59,13 +61,23 @@ public static class EnumerableMappingBuilder
             return null;
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Stack<object>.Push));
-
+        {
+            return CreateForEach(nameof(Stack<object>.Push));
+        }
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(Queue<object>.Enqueue));
-
+        {
+            return CreateForEach(nameof(Queue<object>.Enqueue));
+        }
         if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
-            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, nameof(ICollection<object>.Add));
+        {
+            return CreateForEach(nameof(ICollection<object>.Add));
+        }
+
+        ForEachAddEnumerableExistingTargetMapping CreateForEach(string propertyName)
+        {
+            EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
+            return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, propertyName, ensureCapInfo);
+        }
 
         return null;
     }
@@ -110,13 +122,19 @@ public static class EnumerableMappingBuilder
         }
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Stack<object>.Push));
+            return CreateForEach(nameof(Stack<object>.Push));
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(Queue<object>.Enqueue));
+            return CreateForEach(nameof(Queue<object>.Enqueue));
 
         if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, nameof(ICollection<object>.Add));
+            return CreateForEach(nameof(ICollection<object>.Add));
+
+        ForEachAddEnumerableMapping CreateForEach(string propertyName)
+        {
+            EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
+            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapInfo);
+        }
 
         return null;
     }

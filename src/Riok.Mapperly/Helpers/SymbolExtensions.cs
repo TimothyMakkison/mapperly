@@ -90,7 +90,9 @@ internal static class SymbolExtensions
         if (!symbol.ImplementsGeneric(inter, out var typedInter))
             return false;
 
+        var mem = typedInter.GetMembers(methodName).ToArray();
         var interfaceMethodSymbol = typedInter.GetMembers(methodName).OfType<IMethodSymbol>().Single();
+
 
         var methodInterImplementaton = symbol.FindImplementationForInterfaceMember(interfaceMethodSymbol) as IMethodSymbol;
 
@@ -104,6 +106,33 @@ internal static class SymbolExtensions
         return !methodInterImplementaton.ExplicitInterfaceImplementations.Any();
     }
 
+    internal static bool HasImplicitInterfaceProperty(this ITypeSymbol symbol, INamedTypeSymbol inter, string propertyName)
+    {
+        // return true if symbol is the same interface - does not check that the method is implemented so class A : IList<T> { } will be accepted
+        if (SymbolEqualityComparer.Default.Equals(symbol, inter))
+        {
+            return true;
+        }
+
+        // return false if it does not implement the interface
+        if (!symbol.ImplementsGeneric(inter, out var typedInter))
+            return false;
+
+        var mem = typedInter.GetMembers(propertyName).ToArray();
+        var interfaceMethodSymbol = typedInter.GetMembers(propertyName).OfType<IPropertySymbol>().Single();
+
+
+        var methodInterImplementaton = symbol.FindImplementationForInterfaceMember(interfaceMethodSymbol) as IPropertySymbol;
+
+        // if null then the method is unimplemented
+        // symbol implements genericInterface but has not implemented the corresponding methods
+        // this cannot occur in normal C# code only in unit tests so we make an exception and return true to make it easier to write unit tests
+        if (methodInterImplementaton is null)
+            return true;
+
+        // check if methodImplementation is explicit
+        return !methodInterImplementaton.ExplicitInterfaceImplementations.Any();
+    }
 
     internal static bool CanConsumeType(this ITypeParameterSymbol typeParameter, Compilation compilation, ITypeSymbol type)
     {

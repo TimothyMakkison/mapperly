@@ -19,8 +19,9 @@ public class ForEachAddEnumerableMapping : ExistingTargetMappingMethodWrapper
         ITypeSymbol targetType,
         ITypeMapping elementMapping,
         ObjectFactory? objectFactory,
-        string insertMethodName)
-        : base(new ForEachAddEnumerableExistingTargetMapping(sourceType, targetType, elementMapping, insertMethodName))
+        string insertMethodName,
+        EnsureCapacityInfo? ensureCapInfo)
+        : base(new ForEachAddEnumerableExistingTargetMapping(sourceType, targetType, elementMapping, insertMethodName, ensureCapInfo))
     {
         _objectFactory = objectFactory;
     }

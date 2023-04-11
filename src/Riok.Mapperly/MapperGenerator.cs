@@ -19,7 +19,7 @@ public class MapperGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var mapperClassDeclarations = context.SyntaxProvider
-            .CreateSyntaxProvider(
+            .ForAttributeWithMetadataName(_mapperAttributeName,
                 static (s, _) => IsSyntaxTargetForGeneration(s),
                 static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .WhereNotNull();
@@ -31,25 +31,7 @@ public class MapperGenerator : IIncrementalGenerator
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
         => node is ClassDeclarationSyntax { AttributeLists.Count: > 0 };
 
-    private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext ctx)
-    {
-        var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
-        foreach (var attributeListSyntax in classDeclaration.AttributeLists)
-        {
-            foreach (var attributeSyntax in attributeListSyntax.Attributes)
-            {
-                if (ctx.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol is not IMethodSymbol attributeSymbol)
-                    continue;
-
-                var attributeContainingTypeSymbol = attributeSymbol.ContainingType;
-                var fullName = attributeContainingTypeSymbol.ToDisplayString();
-                if (fullName == _mapperAttributeName)
-                    return classDeclaration;
-            }
-        }
-
-        return null;
-    }
+    private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorAttributeSyntaxContext ctx) => ctx.TargetNode as ClassDeclarationSyntax;
 
     private static void Execute(Compilation compilation, ImmutableArray<ClassDeclarationSyntax> mappers, SourceProductionContext ctx)
     {

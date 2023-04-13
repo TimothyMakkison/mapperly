@@ -16,16 +16,24 @@ public class EnsureCapacityBuilder
     private const string ReadonlyCollectionName = "readonlyCollection";
     private const string CountMethodName = nameof(ICollection<object>.Count);
     private const string LengthMethodName = nameof(Array.Length);
+    private const string TryGetNonEnumeratedCountMethodName = "TryGetNonEnumeratedCount";
 
     public readonly string _targetAccessor;
     public readonly string? _sourceAccessor = null;
     private readonly TypeSyntax? _collectionType = null;
     private readonly TypeSyntax? _readonlyCollectionType = null;
+    private readonly IMethodSymbol? _getNonEnumeratedMethod = null;
 
     public EnsureCapacityBuilder(string targetAccessor, string? sourceAccessor)
     {
         _targetAccessor = targetAccessor;
         _sourceAccessor = sourceAccessor;
+    }
+
+    public EnsureCapacityBuilder(string targetAccessor, IMethodSymbol getNonEnumeratedMethod)
+    {
+        _targetAccessor = targetAccessor;
+        _getNonEnumeratedMethod = getNonEnumeratedMethod;
     }
 
     public EnsureCapacityBuilder(string targetAccessor, TypeSyntax? collectionType, TypeSyntax? readonlyCollectionType)
@@ -60,6 +68,16 @@ public class EnsureCapacityBuilder
         if (!TryGetNonEnumeratedCount(sourceType, types, out var sourceSizeProperty))
         {
             sourceType.ImplementsGeneric(types.IEnumerableT, out var iEnumerable);
+
+            var nonEnumeratedCountMethod = types.Enumerable.GetMembers(TryGetNonEnumeratedCountMethodName)
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(x => x.ReturnType.SpecialType == SpecialType.System_Boolean && x.IsStatic && x.Parameters.Length == 2 && x.IsGenericMethod);
+
+            if (nonEnumeratedCountMethod is not null)
+            {
+                var typedNonEnumeratedCount = nonEnumeratedCountMethod.Construct(iEnumerable!.TypeArguments.ToArray());
+                return new EnsureCapacityBuilder(targetSizeProperty, typedNonEnumeratedCount);
+            }
 
             var collectionType = ParseTypeName(types.ICollectionT.Construct(iEnumerable!.TypeArguments.ToArray()).ToDisplayString());
 
@@ -99,6 +117,27 @@ public class EnsureCapacityBuilder
         // generate check for runtime type, calling EnsureCapacity if it is a collection/readonlyCollection
         // this is used if source is IEnumerable
         var targetCount = MemberAccess(target, _targetAccessor);
+
+        if (_getNonEnumeratedMethod is not null)
+        {
+            var countIdentifier = Identifier(ctx.NameBuilder.New("sourceCount"));
+            var lengthIdent = IdentifierName(countIdentifier);
+
+            var args = Argument(
+                                   DeclarationExpression(
+                                       IdentifierName(Token(SyntaxKind.VarKeyword)),
+                                       SingleVariableDesignation(
+                                           countIdentifier)))
+                               .WithRefOrOutKeyword(
+                                   Token(SyntaxKind.OutKeyword));
+
+
+            var aru = Argument(ctx.Source);
+
+            var s = StaticInvocation(_getNonEnumeratedMethod, aru, args);
+            var state = IfStatement(s, Block(EnsureCapacityStatement(target, lengthIdent, targetCount)));
+            return state;
+        }
 
         var ifCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(CollectionName), _collectionType!, ctx, target, targetCount);
 

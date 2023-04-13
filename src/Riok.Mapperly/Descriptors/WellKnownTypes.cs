@@ -54,7 +54,7 @@ public class WellKnownTypes
     public INamedTypeSymbol IReadOnlyDictionaryT => _iReadOnlyDictionaryT ??= GetTypeSymbol(typeof(IReadOnlyDictionary<,>));
     public INamedTypeSymbol IEnumerableT => _iEnumerableT ??= GetTypeSymbol(typeof(IEnumerable<>));
     public INamedTypeSymbol Enumerable => _enumerable ??= GetTypeSymbol(typeof(Enumerable));
-    //public INamedTypeSymbol ICollectionT => _iCollection ??= GetTypeSymbol(typeof(System.Collections.ICollection));
+    public INamedTypeSymbol ICollection => _iCollection ??= GetTypeSymbol(typeof(System.Collections.ICollection));
     public INamedTypeSymbol ICollectionT => _iCollectionT ??= GetTypeSymbol(typeof(ICollection<>));
     public INamedTypeSymbol IReadOnlyCollectionT => _iReadOnlyCollectionT ??= GetTypeSymbol(typeof(IReadOnlyCollection<>));
     public INamedTypeSymbol IListT => _iListT ??= GetTypeSymbol(typeof(IList<>));

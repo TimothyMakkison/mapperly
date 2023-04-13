@@ -1,11 +1,10 @@
 using Microsoft.CodeAnalysis;
 using Riok.Mapperly.Abstractions;
+using Riok.Mapperly.Descriptors.Enumerables;
 using Riok.Mapperly.Descriptors.Mappings;
 using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Diagnostics;
 using Riok.Mapperly.Helpers;
-
-//using static Riok.Mapperly.Descriptors.Mappings.ExistingTarget.ForEachAddEnumerableExistingTargetMapping;
 
 namespace Riok.Mapperly.Descriptors.MappingBuilders;
 
@@ -73,7 +72,7 @@ public static class EnumerableMappingBuilder
 
         ForEachAddEnumerableExistingTargetMapping CreateForEach(string propertyName)
         {
-            EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
+            var ensureCapInfo = EnsureCapacityBuilder.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, propertyName, ensureCapInfo);
         }
     }
@@ -130,7 +129,7 @@ public static class EnumerableMappingBuilder
 
         ForEachAddEnumerableMapping CreateForEach(string propertyName)
         {
-            EnsureCapacityBuilder.CanEnsureCapacity(ctx.Source, ctx.Target, ctx.Types, out var ensureCapInfo);
+            var ensureCapInfo = EnsureCapacityBuilder.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
             return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapInfo);
         }
     }

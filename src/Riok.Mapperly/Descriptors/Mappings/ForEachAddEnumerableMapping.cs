@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Riok.Mapperly.Descriptors.Enumerables;
 using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Descriptors.ObjectFactories;
 using static Riok.Mapperly.Emit.SyntaxFactoryHelper;
@@ -20,7 +21,7 @@ public class ForEachAddEnumerableMapping : ExistingTargetMappingMethodWrapper
         ITypeMapping elementMapping,
         ObjectFactory? objectFactory,
         string insertMethodName,
-        EnsureCapacityInfo? ensureCapInfo)
+        EnsureCapacityBuilder? ensureCapInfo)
         : base(new ForEachAddEnumerableExistingTargetMapping(sourceType, targetType, elementMapping, insertMethodName, ensureCapInfo))
     {
         _objectFactory = objectFactory;

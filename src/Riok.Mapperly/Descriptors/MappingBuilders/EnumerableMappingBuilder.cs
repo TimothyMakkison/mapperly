@@ -72,7 +72,7 @@ public static class EnumerableMappingBuilder
 
         ForEachAddEnumerableExistingTargetMapping CreateForEach(string propertyName)
         {
-            var ensureCapInfo = EnsureCapacityBuilder.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
+            var ensureCapInfo = EnsureCapacityHelper.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
             return new ForEachAddEnumerableExistingTargetMapping(ctx.Source, ctx.Target, elementMapping, propertyName, ensureCapInfo);
         }
     }
@@ -129,8 +129,8 @@ public static class EnumerableMappingBuilder
 
         ForEachAddEnumerableMapping CreateForEach(string propertyName)
         {
-            var ensureCapInfo = EnsureCapacityBuilder.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
-            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapInfo);
+            var ensureCapacityBuilder = EnsureCapacityHelper.TryCreateEnsureCapacityBuilder(ctx.Source, ctx.Target, ctx.Types);
+            return new ForEachAddEnumerableMapping(ctx.Source, ctx.Target, elementMapping, objectFactory, propertyName, ensureCapacityBuilder);
         }
     }
 

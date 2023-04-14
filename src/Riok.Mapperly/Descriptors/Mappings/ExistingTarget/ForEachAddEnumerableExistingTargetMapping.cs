@@ -16,14 +16,14 @@ public class ForEachAddEnumerableExistingTargetMapping : ExistingTargetMapping
 
     private readonly ITypeMapping _elementMapping;
     private readonly string _insertMethodName;
-    private readonly EnsureCapacityBuilder? _ensureCapInfo;
+    private readonly IEnsureCapacityBuilder? _ensureCapInfo;
 
     public ForEachAddEnumerableExistingTargetMapping(
         ITypeSymbol sourceType,
         ITypeSymbol targetType,
         ITypeMapping elementMapping,
         string insertMethodName,
-        EnsureCapacityBuilder? state)
+        IEnsureCapacityBuilder? state)
         : base(sourceType, targetType)
     {
         _elementMapping = elementMapping;

@@ -80,8 +80,11 @@ public static class EnumerableMappingBuilder
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
             return CreateForEach(nameof(Queue<object>.Enqueue));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
-            return CreateForEach(nameof(ICollection<object>.Add));
+        // create a foreach loop with add calls if source is not an array
+        // and  ICollection.Add(T): void is implemented and not explicit
+        // ensures add is not called and immutable types
+        if (!ctx.Target.IsArrayType() && ctx.Target.HasImplicitInterfaceMethod(ctx.Types.ICollectionT, AddValueMethodName))
+            return CreateForEach(AddValueMethodName);
 
         return null;
 
@@ -137,8 +140,11 @@ public static class EnumerableMappingBuilder
         if (ctx.Target.ImplementsGeneric(ctx.Types.QueueT, out _))
             return CreateForEach(nameof(Queue<object>.Enqueue));
 
-        if (ctx.Target.ImplementsGeneric(ctx.Types.ICollectionT, out _))
-            return CreateForEach(nameof(ICollection<object>.Add));
+        // create a foreach loop with add calls if source is not an array
+        // and  ICollection.Add(T): void is implemented and not explicit
+        // ensures add is not called and immutable types
+        if (!ctx.Target.IsArrayType() && ctx.Target.HasImplicitInterfaceMethod(ctx.Types.ICollectionT, AddValueMethodName))
+            return CreateForEach(AddValueMethodName);
 
         return null;
 

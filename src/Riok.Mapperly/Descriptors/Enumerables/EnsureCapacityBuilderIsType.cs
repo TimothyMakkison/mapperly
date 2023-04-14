@@ -26,13 +26,13 @@ public class EnsureCapacityBuilderIsType : IEnsureCapacityBuilder
     public StatementSyntax BuildEnsureCapacityStatement(TypeMappingBuildContext ctx, ExpressionSyntax target)
     {
         var targetCount = MemberAccess(target, _targetAccessor);
-        var collectionSyntaxType = ParseTypeName(_collectionType!.ToDisplayString());
+        var collectionSyntaxType = FullyQualifiedIdentifier(_collectionType);
 
-        var readonlyCollectionSyntaxType = ParseTypeName(_readonlyCollectionType!.ToDisplayString());
+        var readonlyCollectionSyntaxType = FullyQualifiedIdentifier(_readonlyCollectionType);
 
-        var ifCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(CollectionName), collectionSyntaxType!, ctx, target, targetCount);
+        var ifCollection = IfIsTypeEnsureCapacityStatement(CollectionName, collectionSyntaxType!, ctx, target, targetCount);
 
-        var ifReadonlyCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(ReadonlyCollectionName), readonlyCollectionSyntaxType!, ctx, target, targetCount);
+        var ifReadonlyCollection = IfIsTypeEnsureCapacityStatement(ReadonlyCollectionName, readonlyCollectionSyntaxType!, ctx, target, targetCount);
 
         return ifCollection.WithElse(ElseClause(ifReadonlyCollection));
     }

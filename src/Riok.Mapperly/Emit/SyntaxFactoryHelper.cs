@@ -242,7 +242,7 @@ public static class SyntaxFactoryHelper
 
     public static InvocationExpressionSyntax StaticInvocation(IMethodSymbol method, params ArgumentSyntax[] arguments)
     {
-        var receiverType = method.ReceiverType?.NonNullable().ToDisplayString() ?? throw new ArgumentNullException(nameof(method.ReceiverType));
+        var receiverType = FullyQualifiedIdentifierName(method.ReceiverType?.NonNullable()!) ?? throw new ArgumentNullException(nameof(method.ReceiverType));
 
         var receiverTypeIdentifier = IdentifierName(receiverType);
         var methodAccess = MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, receiverTypeIdentifier, IdentifierName(method.Name));

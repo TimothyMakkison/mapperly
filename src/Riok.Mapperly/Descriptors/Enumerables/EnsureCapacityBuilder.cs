@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riok.Mapperly.Descriptors.Mappings;
+using Riok.Mapperly.Emit;
 using Riok.Mapperly.Helpers;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Riok.Mapperly.Emit.SyntaxFactoryHelper;
@@ -18,10 +19,10 @@ public class EnsureCapacityBuilder
     private const string LengthMethodName = nameof(Array.Length);
     private const string TryGetNonEnumeratedCountMethodName = "TryGetNonEnumeratedCount";
 
-    public readonly string _targetAccessor;
-    public readonly string? _sourceAccessor = null;
-    private readonly TypeSyntax? _collectionType = null;
-    private readonly TypeSyntax? _readonlyCollectionType = null;
+    private readonly string _targetAccessor;
+    private readonly string? _sourceAccessor = null;
+    private readonly INamedTypeSymbol? _collectionType = null;
+    private readonly INamedTypeSymbol? _readonlyCollectionType = null;
     private readonly IMethodSymbol? _getNonEnumeratedMethod = null;
 
     public EnsureCapacityBuilder(string targetAccessor, string? sourceAccessor)
@@ -36,7 +37,7 @@ public class EnsureCapacityBuilder
         _getNonEnumeratedMethod = getNonEnumeratedMethod;
     }
 
-    public EnsureCapacityBuilder(string targetAccessor, TypeSyntax? collectionType, TypeSyntax? readonlyCollectionType)
+    public EnsureCapacityBuilder(string targetAccessor, INamedTypeSymbol? collectionType, INamedTypeSymbol? readonlyCollectionType)
     {
         _targetAccessor = targetAccessor;
         _collectionType = collectionType;
@@ -54,21 +55,15 @@ public class EnsureCapacityBuilder
 
         // if EnsureCapacity is not available then return false
         if (capacityMethod is null)
-        {
             return null;
-        }
 
         // if target does not have a count then return false
         if (!TryGetNonEnumeratedCount(targetType, types, out var targetSizeProperty))
-        {
             return null;
-        }
 
         // if target and source count are known then create a simple EnsureCapacity statement
         if (TryGetNonEnumeratedCount(sourceType, types, out var sourceSizeProperty))
-        {
             return new EnsureCapacityBuilder(targetSizeProperty, sourceSizeProperty);
-        }
 
         sourceType.ImplementsGeneric(types.IEnumerableT, out var iEnumerable);
 
@@ -84,9 +79,9 @@ public class EnsureCapacityBuilder
         }
 
         // if source does not have a count and GetNonEnumeratedCount is not available in the current version then try to get lengths at runtime
-        var collectionType = ParseTypeName(types.ICollectionT.Construct(iEnumerable!.TypeArguments.ToArray()).ToDisplayString());
+        var collectionType = types.ICollectionT.Construct(iEnumerable!.TypeArguments.ToArray());
 
-        var readonlyCollectionType = ParseTypeName(types.IReadOnlyCollectionT.Construct(iEnumerable.TypeArguments.ToArray()).ToDisplayString());
+        var readonlyCollectionType = types.IReadOnlyCollectionT.Construct(iEnumerable.TypeArguments.ToArray());
 
         return new EnsureCapacityBuilder(targetSizeProperty, collectionType, readonlyCollectionType);
     }
@@ -128,7 +123,7 @@ public class EnsureCapacityBuilder
             var enumerableArgument = Argument(ctx.Source);
             var outVarArgument = Argument(
                                    DeclarationExpression(
-                                       IdentifierName(Token(SyntaxKind.VarKeyword)),
+                                       SyntaxFactoryHelper.VarIdentifier,
                                        SingleVariableDesignation(
                                            countIdentifier)))
                                .WithRefOrOutKeyword(
@@ -140,9 +135,13 @@ public class EnsureCapacityBuilder
             return state;
         }
 
-        var ifCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(CollectionName), _collectionType!, ctx, target, targetCount);
+        var collectionSyntaxType = ParseTypeName(_collectionType!.ToDisplayString());
 
-        var ifReadonlyCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(ReadonlyCollectionName), _readonlyCollectionType!, ctx, target, targetCount);
+        var readonlyCollectionSyntaxType = ParseTypeName(_readonlyCollectionType!.ToDisplayString());
+
+        var ifCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(CollectionName), collectionSyntaxType!, ctx, target, targetCount);
+
+        var ifReadonlyCollection = IfIsTypeEnsureCapacityStatement(ctx.NameBuilder.New(ReadonlyCollectionName), readonlyCollectionSyntaxType!, ctx, target, targetCount);
 
         return ifCollection.WithElse(ElseClause(ifReadonlyCollection)); ;
     }

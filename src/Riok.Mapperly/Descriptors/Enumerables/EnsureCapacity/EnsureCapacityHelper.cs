@@ -6,7 +6,7 @@ using Riok.Mapperly.Helpers;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Riok.Mapperly.Emit.SyntaxFactoryHelper;
 
-namespace Riok.Mapperly.Descriptors.Enumerables;
+namespace Riok.Mapperly.Descriptors.Enumerables.EnsureCapacity;
 
 public class EnsureCapacityHelper
 {

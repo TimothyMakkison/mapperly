@@ -5,12 +5,13 @@ using Riok.Mapperly.Descriptors.Mappings;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static Riok.Mapperly.Emit.SyntaxFactoryHelper;
 
-namespace Riok.Mapperly.Descriptors.Enumerables;
+namespace Riok.Mapperly.Descriptors.Enumerables.EnsureCapacity;
 
 public class EnsureCapacityBuilderNonEnumerated : IEnsureCapacityBuilder
 {
     private readonly string _targetAccessor;
     private readonly IMethodSymbol _getNonEnumeratedMethod;
+
     public EnsureCapacityBuilderNonEnumerated(string targetAccessor, IMethodSymbol getNonEnumeratedMethod)
     {
         _targetAccessor = targetAccessor;
@@ -25,7 +26,7 @@ public class EnsureCapacityBuilderNonEnumerated : IEnsureCapacityBuilder
         var countIdentifierName = IdentifierName(countIdentifier);
 
         var enumerableArgument = Argument(ctx.Source);
-        
+
         var outVarArgument = Argument(
                                DeclarationExpression(
                                    VarIdentifier,

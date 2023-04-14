@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Riok.Mapperly.Descriptors.Mappings;
 
-namespace Riok.Mapperly.Descriptors.Enumerables;
+namespace Riok.Mapperly.Descriptors.Enumerables.EnsureCapacity;
 
 public interface IEnsureCapacityBuilder
 {

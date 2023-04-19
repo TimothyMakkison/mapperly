@@ -79,6 +79,9 @@ RMG030  | Mapper   | Error    | Reference loop detected while mapping to an init
 RMG031  | Mapper   | Warning  | Reference loop detected while mapping to a constructor member
 RMG032  | Mapper   | Warning  | The enum mapping strategy ByName cannot be used in projection mappings
 RMG033  | Mapper   | Info     | Object mapped to another object without deep clone
+RMG034  | Mapper   | Error    | Derived source type is duplicated
+RMG035  | Mapper   | Error    | Derived source type is not assignable to parameter type
+RMG036  | Mapper   | Error    | Derived target type is not assignable to return type
 
 ### Removed Rules
 

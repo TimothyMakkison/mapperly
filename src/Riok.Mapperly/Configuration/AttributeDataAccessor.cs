@@ -9,12 +9,12 @@ namespace Riok.Mapperly.Configuration;
 internal static class AttributeDataAccessor
 {
     public static T? AccessFirstOrDefault<T>(Compilation compilation, ISymbol symbol)
-        where T : Attribute => Access<T>(compilation, symbol).FirstOrDefault();
+        where T : Attribute => Access<T, T>(compilation, symbol).FirstOrDefault();
 
-    public static IEnumerable<T> Access<T>(Compilation compilation, ISymbol symbol)
-        where T : Attribute
+    public static IEnumerable<TData> Access<TAttribute, TData>(Compilation compilation, ISymbol symbol)
+        where TAttribute : Attribute
     {
-        var attrType = typeof(T);
+        var attrType = typeof(TAttribute);
         var attrFullName = attrType.FullName;
         if (attrFullName == null)
             yield break;
@@ -27,7 +27,7 @@ internal static class AttributeDataAccessor
 
         foreach (var attrData in attrDatas)
         {
-            var attr = (T)Activator.CreateInstance(attrType, BuildArgumentValues(attrData.ConstructorArguments).ToArray());
+            var attr = (TData)Activator.CreateInstance(typeof(TData), attrData.ConstructorArguments.Select(BuildArgumentValue).ToArray());
 
             foreach (var namedArgument in attrData.NamedArguments)
             {
@@ -35,29 +35,27 @@ internal static class AttributeDataAccessor
                 if (prop == null)
                     throw new InvalidOperationException($"Could not get property {namedArgument.Key} of attribute {attrType.FullName}");
 
-                prop.SetValue(attr, namedArgument.Value.Value);
+                prop.SetValue(attr, BuildArgumentValue(namedArgument.Value));
             }
 
             yield return attr;
         }
     }
 
-    private static IEnumerable<object?> BuildArgumentValues(IEnumerable<TypedConstant> values)
+    private static object? BuildArgumentValue(TypedConstant arg)
     {
-        return values.Select(
-            arg =>
-                arg.Kind switch
-                {
-                    _ when arg.IsNull => null,
-                    TypedConstantKind.Enum => GetEnumValue(arg),
-                    TypedConstantKind.Array => BuildArrayValue(arg),
-                    TypedConstantKind.Primitive => arg.Value,
-                    _
-                        => throw new ArgumentOutOfRangeException(
-                            $"{nameof(AttributeDataAccessor)} does not support constructor arguments of kind {arg.Kind.ToString()}"
-                        ),
-                }
-        );
+        return arg.Kind switch
+        {
+            _ when arg.IsNull => null,
+            TypedConstantKind.Enum => GetEnumValue(arg),
+            TypedConstantKind.Array => BuildArrayValue(arg),
+            TypedConstantKind.Primitive => arg.Value,
+            TypedConstantKind.Type => arg.Value,
+            _
+                => throw new ArgumentOutOfRangeException(
+                    $"{nameof(AttributeDataAccessor)} does not support constructor arguments of kind {arg.Kind.ToString()}"
+                ),
+        };
     }
 
     private static object?[] BuildArrayValue(TypedConstant arg)
@@ -68,7 +66,7 @@ internal static class AttributeDataAccessor
 
         var elementType = GetReflectionType(arrayTypeSymbol.ElementType);
 
-        var values = BuildArgumentValues(arg.Values).ToArray();
+        var values = arg.Values.Select(BuildArgumentValue).ToArray();
         var typedValues = Array.CreateInstance(elementType, values.Length);
         Array.Copy(values, typedValues, values.Length);
         return (object?[])typedValues;

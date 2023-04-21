@@ -20,3 +20,6 @@ var carDto = CarMapper.MapCarToDto(car);
 
 Console.WriteLine("Mapped car to car DTO:");
 Console.WriteLine(JsonSerializer.Serialize(carDto, new JsonSerializerOptions { WriteIndented = true }));
+
+var result = ModelMapper.MapCar(new Porsche() { Value = 101 });
+Console.WriteLine(JsonSerializer.Serialize(result as PorscheDto, new JsonSerializerOptions { WriteIndented = true }));

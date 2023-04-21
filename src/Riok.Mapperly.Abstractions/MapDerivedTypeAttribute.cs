@@ -31,3 +31,30 @@ public class MapDerivedTypeAttribute : Attribute
     /// </summary>
     public Type TargetType { get; }
 }
+
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public class MapDerivedTypeAttribute<TSource, TTarget> : Attribute
+{
+    public MapDerivedTypeAttribute() { }
+
+    /// <summary>
+    /// Registers a derived type mapping.
+    /// </summary>
+    /// <param name="sourceType">The derived source type.</param>
+    /// <param name="targetType">The derived target type.</param>
+    public MapDerivedTypeAttribute(Type sourceType, Type targetType)
+    {
+        SourceType = sourceType;
+        TargetType = targetType;
+    }
+
+    /// <summary>
+    /// Gets the source type of the derived type mapping.
+    /// </summary>
+    public Type SourceType { get; }
+
+    /// <summary>
+    /// Gets the target type of the derived type mapping.
+    /// </summary>
+    public Type TargetType { get; }
+}

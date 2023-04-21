@@ -25,6 +25,14 @@ internal static class AttributeDataAccessor
 
         var attrDatas = symbol.GetAttributes().Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, attrSymbol));
 
+        foreach (var attrData in symbol.GetAttributes().Where(x => x.AttributeClass.TypeParameters.Count() == 2))
+        {
+            var namedSymbol = attrData.AttributeClass;
+            var attr = (TData)Activator.CreateInstance(typeof(TData), namedSymbol.TypeArguments.ToArray());
+
+            yield return attr;
+        }
+
         foreach (var attrData in attrDatas)
         {
             var attr = (TData)Activator.CreateInstance(typeof(TData), attrData.ConstructorArguments.Select(BuildArgumentValue).ToArray());

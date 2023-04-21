@@ -5,6 +5,7 @@
     <TargetFramework>net7.0</TargetFramework>
 
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

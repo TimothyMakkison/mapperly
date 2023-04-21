@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- setting the TargetFramework directly from the cli via -p:TargetFramework=netA.B does not work using a custom msbuild property seems to work -->
-    <MapperlyIntegrationTestsTargetFramework Condition="'$(MapperlyIntegrationTestsTargetFramework)' == ''">net7.0</MapperlyIntegrationTestsTargetFramework>
+    <MapperlyIntegrationTestsTargetFramework Condition="'$(MapperlyIntegrationTestsTargetFramework)' == ''">net48</MapperlyIntegrationTestsTargetFramework>
     <TargetFramework>$(MapperlyIntegrationTestsTargetFramework)</TargetFramework>
 
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>

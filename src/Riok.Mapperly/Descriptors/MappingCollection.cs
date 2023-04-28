@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Riok.Mapperly.Configuration;
 using Riok.Mapperly.Descriptors.Mappings;
 using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Helpers;
@@ -59,17 +60,19 @@ public class MappingCollection
 
         private readonly ITypeSymbol _source;
         private readonly ITypeSymbol _target;
+        private readonly MappingConfiguration? _configuration;
 
         public TypeMappingKey(ITypeMapping mapping)
-            : this(mapping.SourceType, mapping.TargetType) { }
+            : this(mapping.SourceType, mapping.TargetType, null) { }
 
         public TypeMappingKey(IExistingTargetMapping mapping)
-            : this(mapping.SourceType, mapping.TargetType) { }
+            : this(mapping.SourceType, mapping.TargetType, null) { }
 
-        public TypeMappingKey(ITypeSymbol source, ITypeSymbol target)
+        public TypeMappingKey(ITypeSymbol source, ITypeSymbol target, MappingConfiguration? configuration)
         {
             _source = source;
             _target = target;
+            _configuration = configuration;
         }
 
         private bool Equals(TypeMappingKey other) => _comparer.Equals(_source, other._source) && _comparer.Equals(_target, other._target);

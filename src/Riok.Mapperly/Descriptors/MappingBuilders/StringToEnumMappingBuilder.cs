@@ -20,14 +20,24 @@ public static class StringToEnumMappingBuilder
             .OfType<IMethodSymbol>()
             .Any(x => x.IsGenericMethod);
 
-        var config = ctx.GetConfigurationOrDefault<MapEnumAttribute>();
         if (ctx.IsExpression)
-            return new EnumFromStringParseMapping(ctx.Source, ctx.Target, genericEnumParseMethodSupported, config.IgnoreCase);
+            return new EnumFromStringParseMapping(
+                ctx.Source,
+                ctx.Target,
+                genericEnumParseMethodSupported,
+                ctx.Configuration.EnumMappingIgnoreCase
+            );
 
         // from string => use an optimized method of Enum.Parse which would use slow reflection
         // however we currently don't support all features of Enum.Parse yet (ex. flags)
         // therefore we use Enum.Parse as fallback.
         var members = ctx.Target.GetMembers().OfType<IFieldSymbol>();
-        return new EnumFromStringSwitchMapping(ctx.Source, ctx.Target, members, genericEnumParseMethodSupported, config.IgnoreCase);
+        return new EnumFromStringSwitchMapping(
+            ctx.Source,
+            ctx.Target,
+            members,
+            genericEnumParseMethodSupported,
+            ctx.Configuration.EnumMappingIgnoreCase
+        );
     }
 }

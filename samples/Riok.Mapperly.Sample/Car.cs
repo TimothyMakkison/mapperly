@@ -28,6 +28,8 @@ public class Manufacturer
         Name = name;
     }
 
+    public int Ident { get; set; } = 101;
+
     public int Id { get; }
 
     public string Name { get; }
@@ -36,4 +38,9 @@ public class Manufacturer
 public class Tire
 {
     public string Description { get; set; } = string.Empty;
+}
+
+public class Source
+{
+    public Manufacturer? Manufacturer { get; set; }
 }

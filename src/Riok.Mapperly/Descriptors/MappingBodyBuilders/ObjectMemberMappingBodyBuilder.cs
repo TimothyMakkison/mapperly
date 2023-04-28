@@ -197,6 +197,8 @@ public static class ObjectMemberMappingBodyBuilder
         var delegateMapping =
             ctx.BuilderContext.FindMapping(sourceMemberPath.Member.Type, targetMemberPath.Member.Type)
             ?? ctx.BuilderContext.FindOrBuildMapping(
+                sourceMemberPath.Member.Name,
+                targetMemberPath.Member.Name,
                 sourceMemberPath.Member.Type.NonNullable(),
                 targetMemberPath.Member.Type.NonNullable()
             );

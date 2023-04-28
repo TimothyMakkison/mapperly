@@ -35,11 +35,10 @@ public static class EnumMappingBuilder
             return null;
 
         // map enums by strategy
-        var config = ctx.GetConfigurationOrDefault<MapEnumAttribute>();
-        return config.Strategy switch
+        return ctx.Configuration.EnumMappingStrategy switch
         {
             EnumMappingStrategy.ByName when ctx.IsExpression => BuildCastMappingAndDiagnostic(ctx),
-            EnumMappingStrategy.ByName => BuildNameMapping(ctx, config.IgnoreCase),
+            EnumMappingStrategy.ByName => BuildNameMapping(ctx, ctx.Configuration.EnumMappingIgnoreCase),
             _ => new CastMapping(ctx.Source, ctx.Target),
         };
     }

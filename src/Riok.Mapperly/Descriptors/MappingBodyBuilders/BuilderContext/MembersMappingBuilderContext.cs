@@ -25,16 +25,23 @@ public abstract class MembersMappingBuilderContext<T> : IMembersBuilderContext<T
         _unmappedSourceMemberNames = GetSourceMemberNames();
         TargetMembers = GetTargetMembers();
 
-        var ignoredTargetMemberNames = GetIgnoredTargetMembers();
-        IgnoredSourceMemberNames = GetIgnoredSourceMembers();
+        IgnoredSourceMemberNames = FilterNestedMembers(builderContext.Configuration.IgnoredSourceProperties).ToArray();
 
         _ignoredUnmatchedSourceMemberNames = InitIgnoredUnmatchedProperties(IgnoredSourceMemberNames, _unmappedSourceMemberNames);
-        _ignoredUnmatchedTargetMemberNames = InitIgnoredUnmatchedProperties(ignoredTargetMemberNames, TargetMembers.Keys);
+        _ignoredUnmatchedTargetMemberNames = InitIgnoredUnmatchedProperties(
+            builderContext.Configuration.IgnoredTargetProperties,
+            TargetMembers.Keys
+        );
 
         _unmappedSourceMemberNames.ExceptWith(IgnoredSourceMemberNames);
-        TargetMembers.RemoveRange(ignoredTargetMemberNames);
+        TargetMembers.RemoveRange(FilterNestedMembers(builderContext.Configuration.IgnoredTargetProperties));
 
         MemberConfigsByRootTargetName = GetMemberConfigurations();
+    }
+
+    private static IEnumerable<string> FilterNestedMembers(IEnumerable<string> members)
+    {
+        return members.Where(x => !x.Contains("."));
     }
 
     public MappingBuilderContext BuilderContext { get; }
@@ -59,26 +66,9 @@ public abstract class MembersMappingBuilderContext<T> : IMembersBuilderContext<T
 
     private HashSet<string> InitIgnoredUnmatchedProperties(IEnumerable<string> allProperties, IEnumerable<string> mappedProperties)
     {
-        var unmatched = new HashSet<string>(allProperties);
+        var unmatched = new HashSet<string>(FilterNestedMembers(allProperties));
         unmatched.ExceptWith(mappedProperties);
         return unmatched;
-    }
-
-    private HashSet<string> GetIgnoredTargetMembers()
-    {
-        return BuilderContext
-            .ListConfiguration<MapperIgnoreTargetAttribute>()
-            .Select(x => x.Target)
-            // deprecated MapperIgnoreAttribute, but it is still supported by Mapperly.
-#pragma warning disable CS0618
-            .Concat(BuilderContext.ListConfiguration<MapperIgnoreAttribute>().Select(x => x.Target))
-#pragma warning restore CS0618
-            .ToHashSet();
-    }
-
-    private HashSet<string> GetIgnoredSourceMembers()
-    {
-        return BuilderContext.ListConfiguration<MapperIgnoreSourceAttribute>().Select(x => x.Source).ToHashSet();
     }
 
     private HashSet<string> GetSourceMemberNames()
@@ -93,10 +83,7 @@ public abstract class MembersMappingBuilderContext<T> : IMembersBuilderContext<T
 
     private Dictionary<string, List<MapPropertyAttribute>> GetMemberConfigurations()
     {
-        return BuilderContext
-            .ListConfiguration<MapPropertyAttribute>()
-            .GroupBy(x => x.Target.First())
-            .ToDictionary(x => x.Key, x => x.ToList());
+        return BuilderContext.Configuration.PropertyConfigurations.GroupBy(x => x.Target.First()).ToDictionary(x => x.Key, x => x.ToList());
     }
 
     private void AddUnmatchedIgnoredTargetMembersDiagnostics()

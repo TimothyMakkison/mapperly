@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
+using Riok.Mapperly.Configuration;
 using Riok.Mapperly.Descriptors.Mappings;
 using Riok.Mapperly.Descriptors.Mappings.ExistingTarget;
 using Riok.Mapperly.Descriptors.ObjectFactories;
@@ -26,10 +27,31 @@ public class MappingBuilderContext : SimpleMappingBuilderContext
         Source = source;
         Target = target;
         _userSymbol = userSymbol;
+        Configuration = ReadConfiguration(_userSymbol);
     }
+
+    public MappingBuilderContext(
+        SimpleMappingBuilderContext parentCtx,
+        ObjectFactoryCollection objectFactories,
+        MappingConfiguration configuration,
+        ITypeSymbol source,
+        ITypeSymbol target
+    )
+        : base(parentCtx)
+    {
+        ObjectFactories = objectFactories;
+        Source = source;
+        Target = target;
+        _userSymbol = null;
+        Configuration = configuration;
+    }
+
+    public bool Inner { get; set; } = false;
 
     protected MappingBuilderContext(MappingBuilderContext ctx, IMethodSymbol? userSymbol, ITypeSymbol source, ITypeSymbol target)
         : this(ctx, ctx.ObjectFactories, userSymbol, source, target) { }
+
+    public MappingConfiguration Configuration { get; }
 
     public ITypeSymbol Source { get; }
 
@@ -41,12 +63,6 @@ public class MappingBuilderContext : SimpleMappingBuilderContext
     public virtual bool IsExpression => false;
 
     public ObjectFactoryCollection ObjectFactories { get; }
-
-    public T GetConfigurationOrDefault<T>()
-        where T : Attribute => Configuration.GetOrDefault<T>(_userSymbol);
-
-    public IEnumerable<T> ListConfiguration<T>()
-        where T : Attribute => Configuration.ListConfiguration<T>(_userSymbol);
 
     /// <summary>
     /// Tries to find an existing mapping for the provided types.
@@ -149,6 +165,13 @@ public class MappingBuilderContext : SimpleMappingBuilderContext
         return MappingBuilder.Find(sourceType, targetType) ?? BuildMapping(userSymbol, sourceType, targetType, reusable);
     }
 
+    public virtual ITypeMapping? FindOrBuildMapping(string sourcePath, string targetPath, ITypeSymbol sourceType, ITypeSymbol targetType)
+    {
+        sourceType = sourceType.UpgradeNullable();
+        targetType = targetType.UpgradeNullable();
+        return MappingBuilder.Find(sourceType, targetType) ?? BuildMapping(sourcePath, targetPath, sourceType, targetType);
+    }
+
     public void ReportDiagnostic(DiagnosticDescriptor descriptor, params object[] messageArgs) =>
         base.ReportDiagnostic(descriptor, _userSymbol, messageArgs);
 
@@ -176,9 +199,39 @@ public class MappingBuilderContext : SimpleMappingBuilderContext
         return NullFallbackValue.ThrowArgumentNullException;
     }
 
-    protected virtual MappingBuilderContext ContextForMapping(IMethodSymbol? userSymbol, ITypeSymbol sourceType, ITypeSymbol targetType) =>
-        new(this, userSymbol, sourceType, targetType);
+    protected virtual MappingBuilderContext ContextForMapping(IMethodSymbol? userSymbol, ITypeSymbol sourceType, ITypeSymbol targetType)
+    {
+        if (Inner)
+            return new MappingBuilderContext(this, ObjectFactories, Configuration, sourceType, targetType);
+
+        return new(this, userSymbol, sourceType, targetType);
+    }
+
+    public MappingBuilderContext DescendContextForMapping(
+        string sourcePath,
+        string targetPath,
+        ITypeSymbol sourceType,
+        ITypeSymbol targetType
+    )
+    {
+        var newContext = new MappingBuilderContext(
+            this,
+            ObjectFactories,
+            MappingConfiguration.Descend(Configuration, sourcePath, targetPath),
+            sourceType,
+            targetType
+        );
+        newContext.Inner = true;
+
+        return newContext;
+    }
 
     protected ITypeMapping? BuildMapping(IMethodSymbol? userSymbol, ITypeSymbol sourceType, ITypeSymbol targetType, bool reusable) =>
         MappingBuilder.Build(ContextForMapping(userSymbol, sourceType.UpgradeNullable(), targetType.UpgradeNullable()), reusable);
+
+    protected ITypeMapping? BuildMapping(string sourcePath, string targetPath, ITypeSymbol sourceType, ITypeSymbol targetType) =>
+        MappingBuilder.Build(
+            DescendContextForMapping(sourcePath, targetPath, sourceType.UpgradeNullable(), targetType.UpgradeNullable()),
+            true
+        );
 }

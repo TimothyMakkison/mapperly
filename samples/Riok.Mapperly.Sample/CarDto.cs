@@ -31,6 +31,8 @@ public class ProducerDto
         Name = name;
     }
 
+    public int Ident { get; set; }
+
     public int Id { get; }
 
     public string Name { get; }
@@ -39,4 +41,9 @@ public class ProducerDto
 public class TireDto
 {
     public string Description { get; set; } = string.Empty;
+}
+
+public class Source
+{
+    public ProducerDto? Producer { get; set; }
 }

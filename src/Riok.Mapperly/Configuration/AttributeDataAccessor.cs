@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Riok.Mapperly.Helpers;
+using Roslyn.Reflection;
 
 namespace Riok.Mapperly.Configuration;
 
@@ -56,7 +57,22 @@ internal static class AttributeDataAccessor
             var typeArguments = attrData.AttributeClass?.TypeArguments ?? Enumerable.Empty<ITypeSymbol>();
             var ctorArguments = attrData.ConstructorArguments.Select(BuildArgumentValue);
             var newInstanceArguments = typeArguments.Concat(ctorArguments).ToArray();
-            var attr = (TData)Activator.CreateInstance(sym.Base, newInstanceArguments);
+
+            var metadataLoadContext = new MetadataLoadContext(compilation);
+
+            var t = new RoslynType(sym, metadataLoadContext);
+            var tt = (Type)t;
+
+            TData attr;
+            try
+            {
+                var ar = (TData)Activator.CreateInstance(tt, newInstanceArguments);
+                attr = (TData)Activator.CreateInstance(attrType, newInstanceArguments);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
             foreach (var namedArgument in attrData.NamedArguments)
             {
@@ -116,5 +132,19 @@ internal static class AttributeDataAccessor
         var assemblyName = type.ContainingAssembly.Name;
         var qualifiedTypeName = Assembly.CreateQualifiedName(assemblyName, type.ToDisplayString());
         return Type.GetType(qualifiedTypeName) ?? throw new InvalidOperationException($"Type {qualifiedTypeName} not found");
+    }
+
+    public static Type ByName(string name, SemanticModel model)
+    {
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
+        {
+            var tt = assembly.GetType(name);
+            if (tt != null)
+            {
+                return tt;
+            }
+        }
+
+        return null;
     }
 }

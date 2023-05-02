@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.CodeAnalysis;
+using Riok.Mapperly.Helpers;
 
 namespace Riok.Mapperly.Configuration;
 
@@ -32,14 +33,30 @@ internal static class AttributeDataAccessor
 
         var attrDatas = symbol
             .GetAttributes()
-            .Where(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass?.ConstructedFrom ?? x.AttributeClass, attrSymbol));
+            .Select(x => (x, (x.AttributeClass?.ConstructedFrom ?? x.AttributeClass)!))
+            .Where(
+                (
+                    x =>
+                    {
+                        var (_, sym) = x;
+                        if (sym.ImplementsGeneric(attrSymbol, out var t))
+                            return true;
 
-        foreach (var attrData in attrDatas)
+                        var baseType = sym.BaseType;
+                        if (baseType == null)
+                            return false;
+
+                        return SymbolEqualityComparer.Default.Equals(baseType, attrSymbol);
+                    }
+                )
+            );
+
+        foreach (var (attrData, sym) in attrDatas)
         {
             var typeArguments = attrData.AttributeClass?.TypeArguments ?? Enumerable.Empty<ITypeSymbol>();
             var ctorArguments = attrData.ConstructorArguments.Select(BuildArgumentValue);
             var newInstanceArguments = typeArguments.Concat(ctorArguments).ToArray();
-            var attr = (TData)Activator.CreateInstance(typeof(TData), newInstanceArguments);
+            var attr = (TData)Activator.CreateInstance(sym.Base, newInstanceArguments);
 
             foreach (var namedArgument in attrData.NamedArguments)
             {

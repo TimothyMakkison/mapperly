@@ -1,3 +1,4 @@
+using Mapperly.Extensions;
 using Riok.Mapperly.Abstractions;
 
 namespace Riok.Mapperly.Sample;
@@ -7,5 +8,6 @@ namespace Riok.Mapperly.Sample;
 public static partial class CarMapper
 {
     [MapProperty(nameof(Car.Manufacturer), nameof(CarDto.Producer))] // Map property with a different name in the target type
+    [FunkyMapperIgnoreSource(nameof(Car.NumberOfSeats))]
     public static partial CarDto MapCarToDto(Car car);
 }

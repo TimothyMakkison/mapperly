@@ -29,7 +29,7 @@ public class Manufacturer
     }
 
     public int Id { get; }
-
+    public string HexId { get; set; } = "456AB1";
     public string Name { get; }
 }
 

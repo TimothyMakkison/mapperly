@@ -7,5 +7,6 @@ namespace Riok.Mapperly.Sample;
 public static partial class CarMapper
 {
     [MapProperty(nameof(Car.Manufacturer), nameof(CarDto.Producer))] // Map property with a different name in the target type
+    [MapProperty(nameof(Car.Manufacturer.HexId), nameof(CarDto.Producer.UniqueId))] // Map property with a different name in the target type
     public static partial CarDto MapCarToDto(Car car);
 }

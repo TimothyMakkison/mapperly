@@ -26,6 +26,10 @@
     <Exec Command="dotnet husky install" StandardOutputImportance="Low" StandardErrorImportance="High" WorkingDirectory="../.." />
   </Target>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DEBUG_SOURCE_GENERATOR</DefineConstants>
+  </PropertyGroup>
+
   <Import Project="Riok.Mapperly.Roslyn$(ROSLYN_VERSION).props" />
 
   <ItemGroup>

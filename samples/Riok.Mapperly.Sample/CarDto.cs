@@ -25,15 +25,10 @@ public enum CarColorDto
 // The manufacturer, but named differently for demonstration purposes
 public class ProducerDto
 {
-    public ProducerDto(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    public int Id { get; set; }
+    public string UniqueId { get; set; }
 
-    public int Id { get; }
-
-    public string Name { get; }
+    public string Name { get; set; }
 }
 
 public class TireDto

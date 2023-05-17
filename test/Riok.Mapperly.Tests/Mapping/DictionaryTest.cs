@@ -521,4 +521,18 @@ public class DictionaryTest
         );
         TestHelper.GenerateMapper(source, TestHelperOptions.AllowDiagnostics).Should().HaveDiagnostics();
     }
+
+    [Fact]
+    public void ReadOnlyDictionaryMappingDisabledShouldDiagnostic()
+    {
+        var source = TestSourceBuilder.MapperWithBodyAndTypes(
+            "partial void Map(A source, A target);",
+            TestSourceBuilderOptions.WithDisabledMappingConversion(MappingConversionType.ReadOnlyDictionary),
+            "class A { public Dictionary<int, int> Value { get; } }"
+        );
+        TestHelper
+            .GenerateMapper(source, TestHelperOptions.AllowDiagnostics)
+            .Should()
+            .HaveDiagnostic(new(DiagnosticDescriptors.CannotMapToReadOnlyMember));
+    }
 }

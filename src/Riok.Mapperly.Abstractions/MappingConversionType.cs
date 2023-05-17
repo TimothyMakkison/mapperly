@@ -96,6 +96,19 @@ public enum MappingConversionType
     Dictionary = 1 << 12,
 
     /// <summary>
+    /// If the source and the readonly target is an <see cref="IEnumerable{T}"/>
+    /// Maps each element individually.
+    /// </summary>
+    ReadOnlyEnumerable = 1 << 13,
+
+    /// <summary>
+    /// If the source and readonly targets are <see cref="IDictionary{TKey,TValue}"/>
+    /// or <see cref="IReadOnlyDictionary{TKey,TValue}"/>.
+    /// Maps each <see cref="KeyValuePair{TKey,TValue}"/> individually.
+    /// </summary>
+    ReadOnlyDictionary = 1 << 14,
+
+    /// <summary>
     /// Enables all supported conversions.
     /// </summary>
     All = ~None,

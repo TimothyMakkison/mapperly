@@ -2,6 +2,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace Riok.Mapperly.Sample;
 
+// , EnabledConversions = MappingConversionType.All & ~MappingConversionType.ReadOnlyEnumerable
 // Enums of source and target have different numeric values -> use ByName strategy to map them
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName)]
 public static partial class CarMapper

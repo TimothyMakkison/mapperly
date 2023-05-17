@@ -81,6 +81,9 @@ public static class EnumerableMappingBuilder
         if (BuildElementMapping(ctx) is not { } elementMapping)
             return null;
 
+        if (!ctx.IsConversionEnabled(MappingConversionType.ReadOnlyEnumerable))
+            return new BlankExistingMapping(ctx.Source, ctx.Target);
+
         if (ctx.Target.ImplementsGeneric(ctx.Types.StackT, out _))
             return CreateForEach(nameof(Stack<object>.Push));
 

@@ -807,6 +807,20 @@ public class EnumerableTest
     }
 
     [Fact]
+    public void ReadOnlyEnumerableMappingDisabledShouldDiagnostic()
+    {
+        var source = TestSourceBuilder.MapperWithBodyAndTypes(
+            "partial void Map(A source, A target);",
+            TestSourceBuilderOptions.WithDisabledMappingConversion(MappingConversionType.ReadOnlyEnumerable),
+            "class A { public List<int> Value { get; } }"
+        );
+        TestHelper
+            .GenerateMapper(source, TestHelperOptions.AllowDiagnostics)
+            .Should()
+            .HaveDiagnostic(new(DiagnosticDescriptors.CannotMapToReadOnlyMember));
+    }
+
+    [Fact]
     public void EnumerableToReadOnlyArrayPropertyShouldDiagnostic()
     {
         // should not create a mapping that maps to an array by adding to it in a foreach loop

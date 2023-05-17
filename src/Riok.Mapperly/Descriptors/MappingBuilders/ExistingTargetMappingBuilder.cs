@@ -32,6 +32,9 @@ public class ExistingTargetMappingBuilder
             if (mappingBuilder(ctx) is not { } mapping)
                 continue;
 
+            if (mapping is BlankExistingMapping)
+                break;
+
             if (resultIsReusable)
             {
                 _mappings.AddExistingTargetMapping(mapping);

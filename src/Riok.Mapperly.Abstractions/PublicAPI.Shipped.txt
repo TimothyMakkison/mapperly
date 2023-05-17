@@ -60,6 +60,8 @@ Riok.Mapperly.Abstractions.MappingConversionType.ExplicitCast = 4 -> Riok.Mapper
 Riok.Mapperly.Abstractions.MappingConversionType.ImplicitCast = 2 -> Riok.Mapperly.Abstractions.MappingConversionType
 Riok.Mapperly.Abstractions.MappingConversionType.None = 0 -> Riok.Mapperly.Abstractions.MappingConversionType
 Riok.Mapperly.Abstractions.MappingConversionType.ParseMethod = 8 -> Riok.Mapperly.Abstractions.MappingConversionType
+Riok.Mapperly.Abstractions.MappingConversionType.ReadOnlyDictionary = 16384 -> Riok.Mapperly.Abstractions.MappingConversionType
+Riok.Mapperly.Abstractions.MappingConversionType.ReadOnlyEnumerable = 8192 -> Riok.Mapperly.Abstractions.MappingConversionType
 Riok.Mapperly.Abstractions.MappingConversionType.StringToEnum = 32 -> Riok.Mapperly.Abstractions.MappingConversionType
 Riok.Mapperly.Abstractions.MappingConversionType.ToStringMethod = 16 -> Riok.Mapperly.Abstractions.MappingConversionType
 Riok.Mapperly.Abstractions.MappingConversionType.Queryable = 1024 -> Riok.Mapperly.Abstractions.MappingConversionType
@@ -80,3 +82,4 @@ Riok.Mapperly.Abstractions.MapDerivedTypeAttribute
 Riok.Mapperly.Abstractions.MapDerivedTypeAttribute.MapDerivedTypeAttribute(System.Type! sourceType, System.Type! targetType) -> void
 Riok.Mapperly.Abstractions.MapDerivedTypeAttribute.SourceType.get -> System.Type!
 Riok.Mapperly.Abstractions.MapDerivedTypeAttribute.TargetType.get -> System.Type!
+

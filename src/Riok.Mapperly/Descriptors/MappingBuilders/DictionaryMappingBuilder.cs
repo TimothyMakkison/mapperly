@@ -84,6 +84,9 @@ public static class DictionaryMappingBuilder
         if (!ctx.Target.ImplementsGeneric(ctx.Types.IDictionaryT, out _))
             return null;
 
+        if (!ctx.IsConversionEnabled(MappingConversionType.ReadOnlyDictionary))
+            return new BlankExistingMapping(ctx.Source, ctx.Target);
+
         if (BuildKeyValueMapping(ctx) is not var (keyMapping, valueMapping))
             return null;
 

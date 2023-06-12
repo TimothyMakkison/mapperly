@@ -226,73 +226,63 @@ public class MemberPath
             return null;
 
         // try full string
-        if (FindMember(type, source.AsSpan(), comparer, knownTypes) is { } fullMember)
-        {
-            if (!ignoredNames.Contains(source))
-                return new MemberPath(new[] { fullMember });
-        }
-
         var indices = MemberPathCandidateBuilder.GetPascalCaseSplitIndices(source, stackalloc int[16]);
 
-        var final = new List<IMappableMember>(2);
-        // try all permutations, skipping the first because the full string is already yielded
-        var permutationsCount = 1 << indices.Length;
-
-        for (var i = 1; i < permutationsCount; i++)
+        if (source == "NestedNullableIntValue")
         {
-            if (TryBuildMemberPath(type, source, comparer, indices, i, final, knownTypes) is { } memberPath)
-            {
-                if (!ignoredNames.Contains(memberPath.Path.First().Name))
-                    return memberPath;
-            }
-            final.Clear();
+            Console.WriteLine();
+        }
+        if (RecurseMemberPath(type, source, comparer, indices, 0, ignoredNames, knownTypes, out var stack))
+        {
+            return new MemberPath(stack);
         }
 
         return null;
     }
 
-    private static MemberPath? TryBuildMemberPath(
+    private static bool RecurseMemberPath(
         ITypeSymbol type,
         string source,
         StringComparison comparer,
         Span<int> indices,
         int i,
-        List<IMappableMember> final,
-        WellKnownTypes knownTypes
+        IReadOnlyCollection<string>? names,
+        WellKnownTypes knownTypes,
+        out Stack<IMappableMember> stack
     )
     {
-        var lastSplitIndex = 0;
-        var currentSplitPosition = 1;
-        foreach (var splitIndex in indices)
+        stack = null;
+        var start = i == 0 ? 0 : indices[i - 1];
+        var slice = source.AsSpan().Slice(start, source.Length - start);
+        if (FindMember(type, slice, comparer, knownTypes) is { } member)
         {
-            if ((i & currentSplitPosition) == currentSplitPosition)
+            if (names == null || !names.Contains(member.Name))
             {
-                var slice = source.AsSpan().Slice(lastSplitIndex, splitIndex - lastSplitIndex);
-                if (FindMember(type, slice, comparer, knownTypes) is not { } member)
+                stack = new Stack<IMappableMember>(1);
+                stack.Push(member);
+                return true;
+            }
+        }
+
+        for (var j = indices.Length - 1; j >= i; j--)
+        {
+            var slice1 = source.AsSpan().Slice(start, indices[j] - start);
+            if (FindMember(type, slice1, comparer, knownTypes) is { } member1)
+            {
+                if (names != null && names.Contains(member1.Name))
                 {
-                    return null;
+                    continue;
                 }
 
-                final.Add(member);
-                type = member.Type;
-                lastSplitIndex = splitIndex;
+                if (RecurseMemberPath(member1.Type, source, comparer, indices, j + 1, null, knownTypes, out stack))
+                {
+                    stack.Push(member1);
+                    return true;
+                }
             }
-
-            currentSplitPosition <<= 1;
         }
 
-        if (lastSplitIndex < source.Length)
-        {
-            var slice = source.AsSpan().Slice(lastSplitIndex);
-            if (FindMember(type, slice, comparer, knownTypes) is not { } member)
-            {
-                return null;
-            }
-
-            final.Add(member);
-        }
-
-        return new MemberPath(final);
+        return false;
     }
 
     private static bool TryFind(
